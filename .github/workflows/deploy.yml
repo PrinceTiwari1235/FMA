@@ -1,0 +1,40 @@
+name: Build and Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./my-app
+
+      - name: Build and export (next export)
+        run: npm run build:export
+        working-directory: ./my-app
+        env:
+          # optional: set asset prefix for GitHub Pages if hosting under /REPO_NAME
+          # NEXT_PUBLIC_ASSET_PREFIX: /your-repo-name
+          NODE_ENV: production
+
+      - name: Deploy "out" to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./my-app/out
+          publish_branch: gh-pages
+          # optional: set user/email to tidy commit history
+          # committer_name: github-actions[bot]
+          # committer_email: 41898282+github-actions[bot]@users.noreply.github.com
